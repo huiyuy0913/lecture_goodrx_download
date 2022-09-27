@@ -33,6 +33,10 @@ for file_name in glob.glob("html_files/*.html"):
 	soup = BeautifulSoup(f.read(),"html.parser") #put everything in the file into the soup
 	f.close() #close the file
 
+
+
+	description = soup.find("span",{"data-qa": "drug-price-description"}).text
+	generic_name = soup.find("div", {"data-qa": "drug-price-header-subtitle"}).text
 	# print(soup)
 
 	pharmacy_list = soup.find("div",{"aria-label": "List of pharmacy prices"})
@@ -45,11 +49,20 @@ for file_name in glob.glob("html_files/*.html"):
 		price = price.replace(" ", "") #replace the space to nothing in price
 		# print(price)
 
+
+		logo = pharmacy_row.find("img")['src'] 
+
+
+
 		how_to_reg = pharmacy_row.find("span",{"class": "how_to_reg"})
 		if how_to_reg is None:
 			how_to_reg = "no-discount"
+			discount_amount = "0"
 		else:
-		    how_to_reg = "with-discount"
+			discount_amount = re.findall('\$(.*)', how_to_reg.parent.text)[0]
+			how_to_reg = "with-discount"
+
+
 
 		df = pandas.concat([df,    # concat means put two things together, put the name and price in one file
 		pandas.DataFrame.from_records([{
@@ -57,9 +70,12 @@ for file_name in glob.glob("html_files/*.html"):
 			"price": price,
 			"goodrx_discount": how_to_reg,
 			"name": name,
+			"generic_name": generic_name,
 			"form": form,
 			"dosage": dosage,
 			"quantity": quantity,
+			"total_price": float(price) + float(discount_amount),
+			"logo": logo,
 			"scrape_time": scrape_time
 			}])
 	    ])
