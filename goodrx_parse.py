@@ -37,6 +37,14 @@ for file_name in glob.glob("html_files/*.html"):
 
 	description = soup.find("span",{"data-qa": "drug-price-description"}).text
 	generic_name = soup.find("div", {"data-qa": "drug-price-header-subtitle"}).text
+
+
+	related_conditions = soup.find("div",{"data-qa": "related-conditions"})
+	related_conditions_lists = related_conditions.find_all("span",{"class":"re-text"})
+
+	related_conditions_string = "_".join([i.text for i in related_conditions_lists])
+	print(related_conditions_string)
+		
 	# print(soup)
 
 	pharmacy_list = soup.find("div",{"aria-label": "List of pharmacy prices"})
@@ -76,6 +84,7 @@ for file_name in glob.glob("html_files/*.html"):
 			"quantity": quantity,
 			"total_price": float(price) + float(discount_amount),
 			"logo": logo,
+			"related_conditions": related_conditions_string,
 			"scrape_time": scrape_time
 			}])
 	    ])
